@@ -15,9 +15,15 @@ export default new Router({
     },
     {
       path: '/board/:abbr',
-      name: 'Board',
+      name: 'BoardPage',
       props: true,
-      component: () => import(/* webpackChunkName: "board" */ './views/Board.vue')
+      component: () => import(/* webpackChunkName: "BoardPage" */ './views/BoardPage.vue')
+    },
+    {
+      path: '/board/:abbr/thread/:threadNo',
+      name: 'ThreadPage',
+      props: true,
+      component: () => import(/* webpackChunkName: "ThreadPage" */ './views/ThreadPage.vue')
     }
   ]
 })

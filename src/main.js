@@ -6,6 +6,9 @@ import './registerServiceWorker'
 import VueTimeago from 'vue-timeago'
 import './filters.js';
 
+import Post from './components/Post.vue';
+Vue.component('Post', Post);
+
 Vue.use(VueTimeago, {
   name: 'Timeago', // Component name, `Timeago` by default
   locale: 'en', // Default locale

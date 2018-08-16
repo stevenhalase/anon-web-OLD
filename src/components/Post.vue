@@ -1,10 +1,11 @@
 <template>
-  <div class="post">
+  <div :id="`p${post.no}`" class="post">
     <div class="post-info">
       <div class="post-info-author">
         <img v-if="post.country" :src="`https://s.4cdn.org/image/country/${post.country.toLowerCase()}.gif`" />
         <span class="post-info-author-name">{{ post.name }}</span>
         <span class="post-info-author-id" :style="{ color: color, backgroundColor: bgColor }">{{ post.id }}</span>
+        <span class="post-info-author-no">{{ post.no }}</span>
       </div>
       <div class="post-info-timestamp">
         <timeago class="post-info-timestamp-timeago" :datetime="new Date(`${post.now} EDT`)" :auto-update="60"></timeago>
@@ -29,22 +30,53 @@
       </video>
       <img v-else :src="`http://i.4cdn.org/${board}/${post.tim}${post.ext}`" />
     </Modal>
+    <PostPreview v-if="postPreviewOpen && refPost" :board="board" :post="refPost" :all-posts="allPosts" :top-position="topPosition" />
   </div>
 </template>
 
 <script>
 import Modal from './Modal.vue';
+import PostPreview from './PostPreview.vue';
 
 export default {
   name: 'Post',
   data: function() {
     return {
-      imageOpen: false
+      imageOpen: false,
+      refPost: null,
+      position: null,
+      postPreviewOpen: false
     }
   },
   props: {
     board: String,
-    post: Object
+    post: Object,
+    allPosts: Array
+  },
+  mounted() {
+    const post = $(`#p${this.post.no}`);
+    const postQuoteLinks = $(post).find('.quotelink');
+    const _this = this;
+    for (let link of postQuoteLinks) {
+      link.onmouseenter = function() {
+        const refPost = _this.getPostByPostNumber(link.hash.replace('#p', ''));
+        _this.refPost = refPost;
+        _this.topPosition = link.getBoundingClientRect().top;
+        _this.postPreviewOpen = true;
+      }
+
+      link.onmouseleave = function() {
+        _this.refPost = null;
+        _this.postPreviewOpen = false;
+      }
+
+      link.onclick = function() {
+        const refPostEl = $(link.hash);
+        if (refPostEl !== null) {
+          window.scrollTo(0, refPostEl.offset().top);
+        }
+      }
+    }
   },
   computed: {
     bgColor() {
@@ -55,6 +87,12 @@ export default {
     }
   },
   methods: {
+    getPostByPostNumber(postNumber) {
+      const refPost = this.allPosts.find(post => {
+        return post.no == postNumber;
+      })
+      return refPost;
+    },
     openImage() {
       this.imageOpen = true;
     },
@@ -81,7 +119,8 @@ export default {
     }
   },
   components: {
-    Modal
+    Modal,
+    PostPreview
   }
 }
 </script>
@@ -96,6 +135,7 @@ export default {
   flex-wrap: wrap;
   border-radius: 2px;
   font-size: 14px;
+  position: relative;
 
   &-info {
     padding: 10px 15px;
@@ -115,6 +155,10 @@ export default {
         font-size: 10px;
         padding: 3px 5px;
         border-radius: 2px;
+      }
+
+      &-no {
+        margin-left: 5px;
       }
 
     }
